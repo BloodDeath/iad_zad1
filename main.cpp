@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cmath>
 #include "gnuplot_i.hpp"
 #define GNUPLOT_PATH "D:\\Programy\\gnuplot\\bin"
 #define IRIS_PATH "D:\\Programowanie\\IAD\\zadanie1\\iris.data"
@@ -357,12 +358,12 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
                 table[i][j][0]=tab[i%3][0][j];
             }
 
-        for(int q=0;q<3;q++)
-            for(int w=0;w<4;w++)
-            {
-                quicksort(tab,0,50,q,w);
-            }
-        writetofile(tab,"\"D:\\\\Programowanie\\\\IAD\\\\zadanie1\\\\posortowane\"");
+//        for(int q=0;q<3;q++)
+//            for(int w=0;w<4;w++)
+//            {
+//                quicksort(tab,0,50,q,w);
+//            }
+       // writetofile(tab,"\"D:\\\\Programowanie\\\\IAD\\\\zadanie1\\\\posortowane\"");
 
         for(int q=0;q<3;q++)
             for(int e=0;e<50;e++)
@@ -400,7 +401,11 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
             }
             std::cout<<std::endl<<std::endl;
         }
-
+        licz_kwartyle(tab);
+        srednia(tab,-1);
+        srednia(tab,0);
+        srednia(tab,1);
+        srednia(tab,2);
         for(int i=0;i<50;i++)
         {
             delete tab[0][i];
@@ -412,7 +417,56 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         delete tab[2];
         delete tab;
     }
-
+    void licz_kwartyle(double*** tab)
+    {
+        for(int j=0;j<4;j++)
+        {
+        for(int i=0;i<3;i++)
+        {
+            std::cout<<tab[i][13][j]<<" "; // 1 szy kwantyl
+            std::cout<<tab[i][25][j]<<" "; // 2 kwantyl
+            std::cout<<tab[i][38][j]<<" "; // 3 kwantyl
+            std::cout<<std::endl;
+        }
+            std::cout<<std::endl;
+        }
+    }
+    void srednia(double*** tab,double rzad)
+    {
+        std::cout<<"Licze srednia rzedu "<<rzad<<std::endl;
+        bool zero=false;
+        double n = 50;
+        if(rzad==0)
+        {
+            zero=true;
+            rzad =1;
+            n=1;
+        }
+    double sum[4][4]={0};
+        for(int i=0;i<3;i++)
+        {
+            for(int j=0;j<4;j++)
+            {
+                for(int z=0;z<50;z++)
+                {
+                    sum[i][j]=+pow(tab[i][z][j],rzad);
+                    sum[3][j]=+pow(tab[i][z][j],rzad);
+                }
+            }
+        }
+        if(zero) rzad=50;
+        for(int i=0;i<3;i++)
+            for(int j=0;j<4;j++)
+            {
+               sum[i][j]=pow((sum[i][j]/n),rzad);
+            }
+        for(int i=0;i<3;i++) {
+            for (int j = 0; j < 4; j++) {
+                std::cout << sum[i][j] << " ";
+            }
+            std::cout<<std::endl;
+        }
+    }
 };
 
 
@@ -516,5 +570,6 @@ readfile();
 
     iris.min_max_rozstep();
     std::cout << "Hello, World!" << std::endl;
+
     return 0;
 }
