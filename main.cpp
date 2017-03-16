@@ -54,13 +54,30 @@ void quicksort(double*** tab, int left, int right, int q, int w){
     if(right>i) quicksort(tab,i,right,q,w);
 }
 
-
+//void quicksort2(double tab[3][150][4], int left, int right, int q, int w){
+//    int i=left;
+//    int j=right;
+//    double x=tab[q][(left+right)>>1][w];
+//    do{
+//        while(tab[q][i][w]<x) i++;
+//        while(tab[q][j][w]>x) j--;
+//        if(i<=j){
+//            double temp=tab[q][i][w];
+//            tab[q][i][w]=tab[q][j][w];
+//            tab[q][j][w]=temp;
+//            i++;
+//            j--;
+//        }
+//    }while(i<=j);
+//    if(left<j) quicksort(tab,left,j,q,w);
+//    if(right>i) quicksort(tab,i,right,q,w);
+//}
 
 
 class Iris
 {
 private:
-   double data[3][150][4];
+   double data[3][50][4];
      //std::string name;
 public:
     Iris()
@@ -333,12 +350,56 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
             tab[2][i]=new double[4];
         }
         gettab(tab);
+        double table[4][4][3]={0};             // 1 min, 2 max, 3 rozstep
+        for(int i=0;i<4;i++)
+            for(int j=0;j<4;j++)
+            {
+                table[i][j][0]=tab[i%3][0][j];
+            }
+
         for(int q=0;q<3;q++)
             for(int w=0;w<4;w++)
             {
                 quicksort(tab,0,50,q,w);
             }
         writetofile(tab,"\"D:\\\\Programowanie\\\\IAD\\\\zadanie1\\\\posortowane\"");
+
+        for(int q=0;q<3;q++)
+            for(int e=0;e<50;e++)
+           for(int w=0;w<4;w++)
+           {
+               if(table[q][w][0]>tab[q][e][w]) table[q][w][0]=tab[q][e][w];
+               if(table[q][w][1]<tab[q][e][w]) table[q][w][1]=tab[q][e][w];
+
+
+
+           }
+
+            for(int i=0;i<4;i++)
+            {
+                table[3][i][0]=table[0][i][0];
+            }
+        for(int j=0;j<3;j++)
+            for(int i=0;i<4;i++)
+            {
+                if(table[3][i][0]>table[j][i][0])table[3][i][0]=table[j][i][0];
+                if(table[3][i][1]<table[j][i][1])table[3][i][1]=table[j][i][1];
+            }
+        for(int i=0;i<4;i++)
+        for(int q=0;q<4;q++)
+        {
+            table[i][q][2]=table[i][q][1]-table[i][q][0];
+        }
+
+        for(int i=0;i<4;i++) {
+            for (int j = 0; j < 4; j++) {
+                for (int z = 0; z < 3; z++) {
+                    std::cout << table[i][j][z] << "    ";
+                }
+                std::cout << std::endl;
+            }
+            std::cout<<std::endl<<std::endl;
+        }
 
         for(int i=0;i<50;i++)
         {
@@ -452,8 +513,8 @@ readfile();
   //  wykres1.plot_xy(osx,osy);
    // wykres2.plot_xy(osx,osy);
 
-    std::cout << "Hello, World!" << std::endl;
-    iris.min_max_rozstep();
 
+    iris.min_max_rozstep();
+    std::cout << "Hello, World!" << std::endl;
     return 0;
 }
