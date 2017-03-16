@@ -4,13 +4,59 @@
 #include <string>
 #include "gnuplot_i.hpp"
 #define GNUPLOT_PATH "D:\\Programy\\gnuplot\\bin"
-#define IRIS_PATH "D:\\Studia\\IAD\\lab1\\iris.data"
+#define IRIS_PATH "D:\\Programowanie\\IAD\\zadanie1\\iris.data"
 
 
 //1. sepal length in cm
 //2. sepal width in cm
 //3. petal length in cm
 //4. petal width in cm
+void writetofile(double*** data, std::string file)
+{
+std::fstream plik;
+plik.open(file, std::ios::out);
+if(plik.good())
+{
+for(int i=0;i<3;i++) {
+plik<<"Iris nr:"<<i+1<<std::endl;
+for (int j = 0; j < 50; j++) {
+
+for (int k = 0; k < 4; k++) {
+plik << data[i][j][k]<<",";
+}
+plik << std::endl;
+}
+}
+}
+else
+{
+std::cout<<"Plik do zapisu nie do zamkniecia"<<std::endl;
+}
+plik.close();
+}
+
+void quicksort(double*** tab, int left, int right, int q, int w){
+    int i=left;
+    int j=right;
+    double x=tab[q][(left+right)>>1][w];
+    do{
+        while(tab[q][i][w]<x) i++;
+        while(tab[q][j][w]>x) j--;
+        if(i<=j){
+            double temp=tab[q][i][w];
+            tab[q][i][w]=tab[q][j][w];
+            tab[q][j][w]=temp;
+            i++;
+            j--;
+        }
+    }while(i<=j);
+    if(left<j) quicksort(tab,left,j,q,w);
+    if(right>i) quicksort(tab,i,right,q,w);
+}
+
+
+
+
 class Iris
 {
 private:
@@ -24,15 +70,15 @@ public: void add_tab(double x[3][50][4])
     {
         for(int i=0;i<3;i++)
         {
-        for(int j=0;j<50;j++)
+            for(int j=0;j<50;j++)
 
-        {
-            for (int k=0;k<4;k++)
             {
-                data[i][j][k] = x[i][j][k];
-            }
+                for (int k=0;k<4;k++)
+                {
+                    data[i][j][k] = x[i][j][k];
+                }
 
-        }
+            }
 
 
         }
@@ -57,7 +103,7 @@ public: void cout_alldata()
 public: void alldata_tofile()
     {
         std::fstream plik;
-        plik.open("D:\\Studia\\IAD\\lab1\\wynikowy", std::ios::out);
+        plik.open("D:\\Programowanie\\IAD\\zadanie1\\wynikowy", std::ios::out);
         if(plik.good())
         {
             for(int i=0;i<3;i++) {
@@ -210,10 +256,6 @@ public: void rysuj_wykres(Gnuplot wykres)
         osx.clear();
         osy.clear();
     }
-    void funkcja_gowno()
-    {
-        system ("pause");
-    }
 public: void rysuj_drugiwykres(Gnuplot wykres)
     {
         // RYSOWANIE WYKRESU
@@ -245,7 +287,6 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
             osx.push_back(data[1][i][2]);
             osy.push_back(data[1][i][3]);
         }
-        funkcja_gowno();
         wykres.plot_xy(osx,osy, "Versicolor");
         osx.clear();
         osy.clear();
@@ -261,6 +302,56 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         osy.clear();
  //       system("pause");
     }
+    void gettab(double*** tab)
+    {
+        for(int i=0;i<3;i++)
+        {
+            for(int j=0;j<50;j++)
+
+            {
+                for (int k=0;k<4;k++)
+                {
+                    tab[i][j][k]=data[i][j][k];
+                }
+
+            }
+
+
+        }
+    }
+    void min_max_rozstep()
+    {
+        double*** tab;
+        tab=new double**[3];
+        tab[0]=new double*[50];
+        tab[1]=new double*[50];
+        tab[2]=new double*[50];
+        for(int i=0;i<50;i++)
+        {
+            tab[0][i]=new double[4];
+            tab[1][i]=new double[4];
+            tab[2][i]=new double[4];
+        }
+        gettab(tab);
+        for(int q=0;q<3;q++)
+            for(int w=0;w<4;w++)
+            {
+                quicksort(tab,0,50,q,w);
+            }
+        writetofile(tab,"\"D:\\\\Programowanie\\\\IAD\\\\zadanie1\\\\posortowane\"");
+
+        for(int i=0;i<50;i++)
+        {
+            delete tab[0][i];
+            delete tab[1][i];
+            delete tab[2][i];
+        }
+        delete tab[0];
+        delete tab[1];
+        delete tab[2];
+        delete tab;
+    }
+
 };
 
 
@@ -348,7 +439,8 @@ int main() {
 //    std::cout<<array[0][0][0];
 readfile();
     iris.alldata_tofile();
-    iris.rysuj_obanaraz();
+  //iris.rysuj_obanaraz();
+
 //    Gnuplot wykres1;
 //    Gnuplot wykres2;
 //iris.rysuj_wykres(wykres1);
@@ -359,7 +451,9 @@ readfile();
 //    osy.push_back(0);
   //  wykres1.plot_xy(osx,osy);
    // wykres2.plot_xy(osx,osy);
-    system("pause");
+
     std::cout << "Hello, World!" << std::endl;
+    iris.min_max_rozstep();
+
     return 0;
 }
