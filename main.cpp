@@ -5,7 +5,7 @@
 #include <cmath>
 #include "gnuplot_i.hpp"
 #define GNUPLOT_PATH "D:\\Programy\\gnuplot\\bin"
-#define IRIS_PATH "D:\\Programowanie\\IAD\\zadanie1\\iris.data"
+#define IRIS_PATH "D:\\Studia\\IAD\\lab1\\iris.data"
 
 
 //1. sepal length in cm
@@ -55,24 +55,24 @@ void quicksort(double*** tab, int left, int right, int q, int w){
     if(right>i) quicksort(tab,i,right,q,w);
 }
 
-//void quicksort2(double tab[3][150][4], int left, int right, int q, int w){
-//    int i=left;
-//    int j=right;
-//    double x=tab[q][(left+right)>>1][w];
-//    do{
-//        while(tab[q][i][w]<x) i++;
-//        while(tab[q][j][w]>x) j--;
-//        if(i<=j){
-//            double temp=tab[q][i][w];
-//            tab[q][i][w]=tab[q][j][w];
-//            tab[q][j][w]=temp;
-//            i++;
-//            j--;
-//        }
-//    }while(i<=j);
-//    if(left<j) quicksort(tab,left,j,q,w);
-//    if(right>i) quicksort(tab,i,right,q,w);
-//}
+void quicksort_alltable(double tab[4][150], int left, int right,int q){
+    int i=left;
+    int j=right;
+    double x=tab[q][(left+right)>>1];
+    do{
+        while(tab[q][i]<x) i++;
+        while(tab[q][j]>x) j--;
+        if(i<=j){
+            double temp=tab[q][i];
+            tab[q][i]=tab[q][j];
+            tab[q][j]=temp;
+            i++;
+            j--;
+        }
+    }while(i<=j);
+    if(left<j) quicksort_alltable(tab,left,j,q);
+    if(right>i) quicksort_alltable(tab,i,right,q);
+}
 
 
 class Iris
@@ -121,7 +121,7 @@ public: void cout_alldata()
 public: void alldata_tofile()
     {
         std::fstream plik;
-        plik.open("D:\\Programowanie\\IAD\\zadanie1\\wynikowy", std::ios::out);
+        plik.open("D:\\Studia\\IAD\\lab1\\wynikowy", std::ios::out);
         if(plik.good())
         {
             for(int i=0;i<3;i++) {
@@ -350,7 +350,15 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
             tab[1][i]=new double[4];
             tab[2][i]=new double[4];
         }
+        double alltable[4][150];
         gettab(tab);
+        for(int i=0;i<4;i++)
+            for(int j=0;j<150;j++)
+            {
+                alltable[i][j]=tab[j/50][j%50][i];
+            }
+        for(int i=0;i<4;i++)
+        quicksort_alltable(alltable,0,149,i);
         double table[4][4][3]={0};             // 1 min, 2 max, 3 rozstep
         for(int i=0;i<4;i++)
             for(int j=0;j<4;j++)
@@ -358,12 +366,12 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
                 table[i][j][0]=tab[i%3][0][j];
             }
 
-//        for(int q=0;q<3;q++)
-//            for(int w=0;w<4;w++)
-//            {
-//                quicksort(tab,0,50,q,w);
-//            }
-       // writetofile(tab,"\"D:\\\\Programowanie\\\\IAD\\\\zadanie1\\\\posortowane\"");
+        for(int q=0;q<3;q++)
+            for(int w=0;w<4;w++)
+            {
+                quicksort(tab,0,49,q,w);
+            }
+        writetofile(tab,"D:\\Studia\\IAD\\lab1\\posortowane");
 
         for(int q=0;q<3;q++)
             for(int e=0;e<50;e++)
@@ -402,6 +410,14 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
             std::cout<<std::endl<<std::endl;
         }
         licz_kwartyle(tab);
+        for(int i=0;i<4;i++)
+        {
+            std::cout<<"Cecha numer: "<<i<<std::endl;
+
+        std::cout<<alltable[i][49]<<"   ";
+        std::cout<<alltable[i][99]<<"   ";
+        std::cout<<alltable[i][149]<<std::endl;
+        }
         srednia(tab,-1);
         srednia(tab,0);
         srednia(tab,1);
@@ -419,8 +435,11 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
     }
     void licz_kwartyle(double*** tab)
     {
+        std::cout<<"1szy    2gi 3ci"<<std::endl;
+
         for(int j=0;j<4;j++)
         {
+            std::cout<<j+1<<" cecha"<<std::endl;
         for(int i=0;i<3;i++)
         {
             std::cout<<tab[i][13][j]<<" "; // 1 szy kwantyl
@@ -436,25 +455,46 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         std::cout<<"Licze srednia rzedu "<<rzad<<std::endl;
         bool zero=false;
         double n = 50;
+        double sum[4][4]={0};
         if(rzad==0)
         {
             zero=true;
             rzad =1;
             n=1;
+            for(int i=0;i<3;i++)
+            {
+                for(int j=0;j<4;j++)
+                {
+                    for(int z=0;z<50;z++)
+                    {
+                        sum[i][j]=1;
+                        sum[3][j]=1;
+                    }
+                }
+            }
         }
-    double sum[4][4]={0};
+
         for(int i=0;i<3;i++)
         {
             for(int j=0;j<4;j++)
             {
-                for(int z=0;z<50;z++)
-                {
-                    sum[i][j]=+pow(tab[i][z][j],rzad);
-                    sum[3][j]=+pow(tab[i][z][j],rzad);
+                for(int z=0;z<50;z++) {
+                    if (zero) {
+
+                        sum[i][j] = sum[i][j] * tab[i][z][j];
+                        sum[3][j] = sum[3][j] * tab[i][z][j];
+                    } else {
+                    sum[i][j] = +pow(tab[i][z][j], rzad);
+                    sum[3][j] = +pow(tab[i][z][j], rzad);
+                     }
                 }
             }
         }
-        if(zero) rzad=50;
+        if(zero) {rzad=1.0/50.0; n=1;}
+        else
+        {
+            rzad=1.0/rzad;
+        }
         for(int i=0;i<3;i++)
             for(int j=0;j<4;j++)
             {
@@ -554,7 +594,7 @@ int main() {
 //    std::cout<<array[0][0][0];
 readfile();
     iris.alldata_tofile();
-  //iris.rysuj_obanaraz();
+    iris.rysuj_obanaraz();
 
 //    Gnuplot wykres1;
 //    Gnuplot wykres2;
