@@ -2,19 +2,83 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cmath>
 #include "gnuplot_i.hpp"
 #define GNUPLOT_PATH "D:\\Programy\\gnuplot\\bin"
-#define IRIS_PATH "D:\\Studia\\IAD\\lab1\\iris.data"
+#define IRIS_PATH "..\\iris.data"
 
 
 //1. sepal length in cm
 //2. sepal width in cm
 //3. petal length in cm
 //4. petal width in cm
+void writetofile(double*** data, std::string file)
+{
+std::fstream plik;
+plik.open(file, std::ios::out);
+if(plik.good())
+{
+for(int i=0;i<3;i++) {
+plik<<"Iris nr:"<<i+1<<std::endl;
+for (int j = 0; j < 50; j++) {
+
+for (int k = 0; k < 4; k++) {
+plik << data[i][j][k]<<",";
+}
+plik << std::endl;
+}
+}
+}
+else
+{
+std::cout<<"Plik do zapisu nie do zamkniecia"<<std::endl;
+}
+plik.close();
+}
+
+void quicksort(double*** tab, int left, int right, int q, int w){
+    int i=left;
+    int j=right;
+    double x=tab[q][(left+right)>>1][w];
+    do{
+        while(tab[q][i][w]<x) i++;
+        while(tab[q][j][w]>x) j--;
+        if(i<=j){
+            double temp=tab[q][i][w];
+            tab[q][i][w]=tab[q][j][w];
+            tab[q][j][w]=temp;
+            i++;
+            j--;
+        }
+    }while(i<=j);
+    if(left<j) quicksort(tab,left,j,q,w);
+    if(right>i) quicksort(tab,i,right,q,w);
+}
+
+void quicksort_alltable(double tab[4][150], int left, int right,int q){
+    int i=left;
+    int j=right;
+    double x=tab[q][(left+right)>>1];
+    do{
+        while(tab[q][i]<x) i++;
+        while(tab[q][j]>x) j--;
+        if(i<=j){
+            double temp=tab[q][i];
+            tab[q][i]=tab[q][j];
+            tab[q][j]=temp;
+            i++;
+            j--;
+        }
+    }while(i<=j);
+    if(left<j) quicksort_alltable(tab,left,j,q);
+    if(right>i) quicksort_alltable(tab,i,right,q);
+}
+
+
 class Iris
 {
 private:
-   double data[3][150][4];
+   double data[3][50][4];
      //std::string name;
 public:
     Iris()
@@ -24,15 +88,15 @@ public: void add_tab(double x[3][50][4])
     {
         for(int i=0;i<3;i++)
         {
-        for(int j=0;j<50;j++)
+            for(int j=0;j<50;j++)
 
-        {
-            for (int k=0;k<4;k++)
             {
-                data[i][j][k] = x[i][j][k];
-            }
+                for (int k=0;k<4;k++)
+                {
+                    data[i][j][k] = x[i][j][k];
+                }
 
-        }
+            }
 
 
         }
@@ -57,7 +121,7 @@ public: void cout_alldata()
 public: void alldata_tofile()
     {
         std::fstream plik;
-        plik.open("D:\\Studia\\IAD\\lab1\\wynikowy", std::ios::out);
+        plik.open("..\\wynikowy", std::ios::out);
         if(plik.good())
         {
             for(int i=0;i<3;i++) {
@@ -210,10 +274,6 @@ public: void rysuj_wykres(Gnuplot wykres)
         osx.clear();
         osy.clear();
     }
-    void funkcja_gowno()
-    {
-        system ("pause");
-    }
 public: void rysuj_drugiwykres(Gnuplot wykres)
     {
         // RYSOWANIE WYKRESU
@@ -245,7 +305,6 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
             osx.push_back(data[1][i][2]);
             osy.push_back(data[1][i][3]);
         }
-        funkcja_gowno();
         wykres.plot_xy(osx,osy, "Versicolor");
         osx.clear();
         osy.clear();
@@ -260,6 +319,199 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         osx.clear();
         osy.clear();
  //       system("pause");
+    }
+    void gettab(double*** tab)
+    {
+        for(int i=0;i<3;i++)
+        {
+            for(int j=0;j<50;j++)
+
+            {
+                for (int k=0;k<4;k++)
+                {
+                    tab[i][j][k]=data[i][j][k];
+                }
+
+            }
+
+
+        }
+    }
+    void min_max_rozstep()
+    {
+        double*** tab;
+        tab=new double**[3];
+        tab[0]=new double*[50];
+        tab[1]=new double*[50];
+        tab[2]=new double*[50];
+        for(int i=0;i<50;i++)
+        {
+            tab[0][i]=new double[4];
+            tab[1][i]=new double[4];
+            tab[2][i]=new double[4];
+        }
+        double alltable[4][150];
+        gettab(tab);
+        for(int i=0;i<4;i++)
+            for(int j=0;j<150;j++)
+            {
+                alltable[i][j]=tab[j/50][j%50][i];
+            }
+        for(int i=0;i<4;i++)
+        quicksort_alltable(alltable,0,149,i);
+        double table[4][4][3]={0};             // 1 min, 2 max, 3 rozstep
+        for(int i=0;i<4;i++)
+            for(int j=0;j<4;j++)
+            {
+                table[i][j][0]=tab[i%3][0][j];
+            }
+
+        for(int q=0;q<3;q++)
+            for(int w=0;w<4;w++)
+            {
+                quicksort(tab,0,49,q,w);
+            }
+        writetofile(tab,"D:\\Studia\\IAD\\lab1\\posortowane");
+
+        for(int q=0;q<3;q++)
+            for(int e=0;e<50;e++)
+           for(int w=0;w<4;w++)
+           {
+               if(table[q][w][0]>tab[q][e][w]) table[q][w][0]=tab[q][e][w];
+               if(table[q][w][1]<tab[q][e][w]) table[q][w][1]=tab[q][e][w];
+
+
+
+           }
+
+            for(int i=0;i<4;i++)
+            {
+                table[3][i][0]=table[0][i][0];
+            }
+        for(int j=0;j<3;j++)
+            for(int i=0;i<4;i++)
+            {
+                if(table[3][i][0]>table[j][i][0])table[3][i][0]=table[j][i][0];
+                if(table[3][i][1]<table[j][i][1])table[3][i][1]=table[j][i][1];
+            }
+        for(int i=0;i<4;i++)
+        for(int q=0;q<4;q++)
+        {
+            table[i][q][2]=table[i][q][1]-table[i][q][0];
+        }
+
+        for(int i=0;i<4;i++) {
+            for (int j = 0; j < 4; j++) {
+                for (int z = 0; z < 3; z++) {
+                    std::cout << table[i][j][z] << "    ";
+                }
+                std::cout << std::endl;
+            }
+            std::cout<<std::endl<<std::endl;
+        }
+        licz_kwartyle(tab);
+        for(int i=0;i<4;i++)
+        {
+            std::cout<<"Cecha numer: "<<i<<std::endl;
+
+        std::cout<<alltable[i][49]<<"   ";
+        std::cout<<alltable[i][99]<<"   ";
+        std::cout<<alltable[i][149]<<std::endl;
+        }
+        srednia(tab,-1);
+        srednia(tab,0);
+        srednia(tab,1);
+        srednia(tab,2);
+        for(int i=0;i<50;i++)
+        {
+            delete tab[0][i];
+            delete tab[1][i];
+            delete tab[2][i];
+        }
+        delete tab[0];
+        delete tab[1];
+        delete tab[2];
+        delete tab;
+    }
+    void licz_kwartyle(double*** tab)
+    {
+        std::cout<<"1szy    2gi 3ci"<<std::endl;
+
+        for(int j=0;j<4;j++)
+        {
+            std::cout<<j+1<<" cecha"<<std::endl;
+        for(int i=0;i<3;i++)
+        {
+            std::cout<<tab[i][13][j]<<" "; // 1 szy kwantyl
+            std::cout<<tab[i][25][j]<<" "; // 2 kwantyl
+            std::cout<<tab[i][38][j]<<" "; // 3 kwantyl
+            std::cout<<std::endl;
+        }
+            std::cout<<std::endl;
+        }
+    }
+
+    void srednia (double*** tab, double rzad) {
+        std::cout << "Licze srednia rzedu " << rzad << std::endl; // komunikat ktory rzad liczymy
+        double n = 50; // ilosc irysow w rodzaju
+        double sum[4][4] = {0}; // tabelka na srednie poszczegolnych parametrow i rodzajow, ostatni param to avg wszystkiego
+
+        // RZAD 0 przypadek szczegolny (srednia geometryczna)
+        if (rzad == 0) {
+            // licze sume logarytmow POSZCZEGOLNYCH RODZAJOW
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszzystkich itemach
+                    for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                        sum[i][k] += log(tab[i][j][k]);
+                    }
+                }
+            }
+            // licze sume logarytmow WSZYSTKIEGO
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
+            }
+            // teraz wszystkie sumy logarytmów do exp i pierwiastka POSZCZEGOLNYCH RODZAJOW
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                    sum[i][k] = pow(exp(sum[i][k]), 1/n);
+                }
+            }
+            // sumy logarytmów do exp i pierwiastka WSZYSTKIEGO
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[3][k] = pow(exp(sum[3][k]), 1/(3*n));
+            }
+        } else {
+            // licze sume poteg POSZCZEGOLNYCH RODZAJOW
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszzystkich itemach
+                    for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                        sum[i][k] += pow(tab[i][j][k], rzad);
+                    }
+                }
+            }
+            // licze sume poteg WSZYSTKIEGO
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
+            }
+            // teraz wszystkie sumy poteg POSZCZEGOLNYCH RODZAJOW przez n i pierwiastek rzędu
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                    sum[i][k] = pow((sum[i][k]/n), 1/rzad);
+                }
+            }
+            // sumy poteg WSZYSTKIEGO przez n i pierwiastek rzędu
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[3][k] = pow((sum[3][k]/(n*3)), 1/rzad);
+            }
+
+        }
+
+        // wyswietlanie przybytku
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++)
+                std::cout << sum[i][j] << " ";
+            std::cout << std::endl;
+        }
     }
 };
 
@@ -331,7 +583,7 @@ void readfile() {
                 virginica_i++;
 
             }
-            else std::cout<<"Cos sie popsulo"<<std::endl;
+            else std::cout << "Linia pominieta, poniewaz nie spelnia wymagan parsera." << std::endl;
         }
         plik.close();
     }
@@ -349,6 +601,7 @@ int main() {
 readfile();
     iris.alldata_tofile();
     iris.rysuj_obanaraz();
+
 //    Gnuplot wykres1;
 //    Gnuplot wykres2;
 //iris.rysuj_wykres(wykres1);
@@ -359,7 +612,10 @@ readfile();
 //    osy.push_back(0);
   //  wykres1.plot_xy(osx,osy);
    // wykres2.plot_xy(osx,osy);
-    system("pause");
+
+
+    iris.min_max_rozstep();
     std::cout << "Hello, World!" << std::endl;
+
     return 0;
 }
