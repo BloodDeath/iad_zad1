@@ -4,8 +4,8 @@
 #include <string>
 #include <cmath>
 #include "gnuplot_i.hpp"
-#define GNUPLOT_PATH "D:\\Programy\\gnuplot\\bin"
-#define IRIS_PATH "D:\\Studia\\IAD\\lab1\\iris.data"
+#define GNUPLOT_PATH "C:\\gnuplot\\bin"
+#define IRIS_PATH "..\\iris.data"
 
 
 //1. sepal length in cm
@@ -121,7 +121,7 @@ public: void cout_alldata()
 public: void alldata_tofile()
     {
         std::fstream plik;
-        plik.open("D:\\Studia\\IAD\\lab1\\wynikowy", std::ios::out);
+        plik.open("..\\wynikowy", std::ios::out);
         if(plik.good())
         {
             for(int i=0;i<3;i++) {
@@ -450,61 +450,43 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
             std::cout<<std::endl;
         }
     }
-    void srednia(double*** tab,double rzad)
-    {
-        std::cout<<"Licze srednia rzedu "<<rzad<<std::endl;
-        bool zero=false;
-        double n = 50;
-        double sum[4][4]={0};
-        if(rzad==0)
-        {
-            zero=true;
-            rzad =1;
-            n=1;
-            for(int i=0;i<3;i++)
-            {
-                for(int j=0;j<4;j++)
-                {
-                    for(int z=0;z<50;z++)
-                    {
-                        sum[i][j]=1;
-                        sum[3][j]=1;
+
+    void srednia (double*** tab,double rzad) {
+        std::cout << "Licze srednia rzedu " << rzad << std::endl; // komunikat ktory rzad liczymy
+        double n = 50; // ilosc irysow w rodzaju
+        double sum[4][4] = {0}; // tabelka na srednie poszczegolnych parametrow i rodzajow, ostatni param to avg wszystkiego
+
+        // RZAD 0 przypadek szczegolny (srednia geometryczna)
+        if (rzad == 0) {
+            // licze ssume logarytmow POSZCZEGOLNYCH RODZAJOW
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszzystkich itemach
+                    for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                        sum[i][k] += log(tab[i][j][k]);
                     }
                 }
             }
-        }
-
-        for(int i=0;i<3;i++)
-        {
-            for(int j=0;j<4;j++)
-            {
-                for(int z=0;z<50;z++) {
-                    if (zero) {
-
-                        sum[i][j] = sum[i][j] * tab[i][z][j];
-                        sum[3][j] = sum[3][j] * tab[i][z][j];
-                    } else {
-                    sum[i][j] = +pow(tab[i][z][j], rzad);
-                    sum[3][j] = +pow(tab[i][z][j], rzad);
-                     }
+            // licze sume logarytmow WSZYSTKIEGO
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
+            }
+            // teraz wszystkie sumy logarytmów do exp i pierwiastka POSZCZEGOLNYCH RODZAJOW
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                    sum[i][k] = pow(exp(sum[i][k]), 1/n);
                 }
             }
-        }
-        if(zero) {rzad=1.0/50.0; n=1;}
-        else
-        {
-            rzad=1.0/rzad;
-        }
-        for(int i=0;i<3;i++)
-            for(int j=0;j<4;j++)
-            {
-               sum[i][j]=pow((sum[i][j]/n),rzad);
+            // sumy logarytmów do exp i pierwiastka WSZYSTKIEGO
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[3][k] = pow(exp(sum[3][k]), 1/(3*n));
             }
-        for(int i=0;i<3;i++) {
-            for (int j = 0; j < 4; j++) {
+        }
+
+        // wyswietlanie przybytku
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++)
                 std::cout << sum[i][j] << " ";
-            }
-            std::cout<<std::endl;
+            std::cout << std::endl;
         }
     }
 };
