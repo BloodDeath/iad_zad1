@@ -4,7 +4,7 @@
 #include <string>
 #include <cmath>
 #include "gnuplot_i.hpp"
-#define GNUPLOT_PATH "C:\\gnuplot\\bin"
+#define GNUPLOT_PATH "D:\\Programy\\gnuplot\\bin"
 #define IRIS_PATH "..\\iris.data"
 
 
