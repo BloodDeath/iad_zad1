@@ -451,14 +451,14 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         }
     }
 
-    void srednia (double*** tab,double rzad) {
+    void srednia (double*** tab, double rzad) {
         std::cout << "Licze srednia rzedu " << rzad << std::endl; // komunikat ktory rzad liczymy
         double n = 50; // ilosc irysow w rodzaju
         double sum[4][4] = {0}; // tabelka na srednie poszczegolnych parametrow i rodzajow, ostatni param to avg wszystkiego
 
         // RZAD 0 przypadek szczegolny (srednia geometryczna)
         if (rzad == 0) {
-            // licze ssume logarytmow POSZCZEGOLNYCH RODZAJOW
+            // licze sume logarytmow POSZCZEGOLNYCH RODZAJOW
             for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
                 for (int j = 0; j < 50; j++) { // petelka j jedzie po wszzystkich itemach
                     for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
@@ -480,6 +480,30 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
             for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
                 sum[3][k] = pow(exp(sum[3][k]), 1/(3*n));
             }
+        } else {
+            // licze sume poteg POSZCZEGOLNYCH RODZAJOW
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszzystkich itemach
+                    for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                        sum[i][k] += pow(tab[i][j][k], rzad);
+                    }
+                }
+            }
+            // licze sume poteg WSZYSTKIEGO
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
+            }
+            // teraz wszystkie sumy poteg POSZCZEGOLNYCH RODZAJOW przez n i pierwiastek rzędu
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                    sum[i][k] = pow((sum[i][k]/n), 1/rzad);
+                }
+            }
+            // sumy poteg WSZYSTKIEGO przez n i pierwiastek rzędu
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[3][k] = pow((sum[3][k]/(n*3)), 1/rzad);
+            }
+
         }
 
         // wyswietlanie przybytku
