@@ -422,6 +422,7 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         srednia(tab,0);
         srednia(tab,1);
         srednia(tab,2);
+        srednia(tab,3);
         for(int i=0;i<50;i++)
         {
             delete tab[0][i];
