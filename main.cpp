@@ -583,7 +583,7 @@ void readfile() {
                 virginica_i++;
 
             }
-            else std::cout<<"Cos sie popsulo"<<std::endl;
+            else std::cout << "Linia nie spełnia wymagan parsera." << std::endl;
         }
         plik.close();
     }
