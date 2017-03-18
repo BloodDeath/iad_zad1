@@ -80,6 +80,8 @@ class Iris
 private:
     double data[3][50][4];
     double srednieArytm[4][4];
+    double wariancje[4][4];
+    double odchylenia[4][4];
     //std::string name;
 public:
     Iris()
@@ -514,7 +516,7 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
     }
     
     void wariancja() {
-        std::cout << std::endl << "Licze wariancje " << std::endl; // komunikat ktory rzad liczymy
+        std::cout << std::endl << "Licze wariancje" << std::endl; // komunikat co liczymy
         double n = 50; // ilosc irysow w rodzaju
         double sum[4][4] = {0}; // tabelka na wariancje poszczegolnych parametrow i rodzajow, ostatni wiersz to w wszystkiego
 
@@ -546,11 +548,25 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
 
         // wyswietlanie przybytku
         for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++)
+            for (int j = 0; j < 4; j++) {
                 std::cout << sum[i][j] << " ";
+                wariancje[i][j] = sum[i][j]; // wypisz wyniki do zmieennej priv
+            }
             std::cout << std::endl;
         }
+    }
 
+    void odchylenie_standardowe() {
+        std::cout << std::endl << "Licze ochylenia standardowe" << std::endl; // komunikat co liczymy
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                double odch = pow(wariancje[i][j], 0.5);
+                std::cout << odch << " ";
+                odchylenia[i][j] = odch; // wypisz wyniki do zmieennej priv
+            }
+            std::cout << std::endl;
+        }
     }
 };
 
@@ -660,6 +676,7 @@ readfile();
     iris.srednia(2);
     iris.srednia(3);
     iris.wariancja();
+    iris.odchylenie_standardowe();
 
     std::cout << std::endl << "Hello, World!" << std::endl;
 
