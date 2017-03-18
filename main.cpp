@@ -78,8 +78,9 @@ void quicksort_alltable(double tab[4][150], int left, int right,int q){
 class Iris
 {
 private:
-   double data[3][50][4];
-     //std::string name;
+    double data[3][50][4];
+    double srednieArytm[4][4];
+    //std::string name;
 public:
     Iris()
     {
@@ -418,11 +419,6 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         std::cout<<alltable[i][99]<<"   ";
         std::cout<<alltable[i][149]<<std::endl;
         }
-        srednia(tab,-1);
-        srednia(tab,0);
-        srednia(tab,1);
-        srednia(tab,2);
-        srednia(tab,3);
         for(int i=0;i<50;i++)
         {
             delete tab[0][i];
@@ -452,18 +448,18 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         }
     }
 
-    void srednia (double*** tab, double rzad) {
-        std::cout << "Licze srednia rzedu " << rzad << std::endl; // komunikat ktory rzad liczymy
+    void srednia (double rzad) {
+        std::cout << std::endl << "Licze srednia rzedu " << rzad << std::endl; // komunikat ktory rzad liczymy
         double n = 50; // ilosc irysow w rodzaju
-        double sum[4][4] = {0}; // tabelka na srednie poszczegolnych parametrow i rodzajow, ostatni param to avg wszystkiego
+        double sum[4][4] = {0}; // tabelka na srednie poszczegolnych parametrow i rodzajow, ostatni wiersz to avg wszystkiego
 
         // RZAD 0 przypadek szczegolny (srednia geometryczna)
         if (rzad == 0) {
             // licze sume logarytmow POSZCZEGOLNYCH RODZAJOW
             for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszzystkich itemach
+                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
                     for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                        sum[i][k] += log(tab[i][j][k]);
+                        sum[i][k] += log(data[i][j][k]);
                     }
                 }
             }
@@ -484,9 +480,9 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         } else {
             // licze sume poteg POSZCZEGOLNYCH RODZAJOW
             for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszzystkich itemach
+                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
                     for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                        sum[i][k] += pow(tab[i][j][k], rzad);
+                        sum[i][k] += pow(data[i][j][k], rzad);
                     }
                 }
             }
@@ -509,10 +505,52 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
 
         // wyswietlanie przybytku
         for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                std::cout << sum[i][j] << " ";
+                if (rzad == 1) srednieArytm[i][j] = sum[i][j]; // zachowanie srednich potrzebnych do dalszych obliczeń
+            }
+            std::cout << std::endl;
+        }
+    }
+    
+    void wariancja() {
+        std::cout << std::endl << "Licze wariancje " << std::endl; // komunikat ktory rzad liczymy
+        double n = 50; // ilosc irysow w rodzaju
+        double sum[4][4] = {0}; // tabelka na wariancje poszczegolnych parametrow i rodzajow, ostatni wiersz to w wszystkiego
+
+        // liczymy sume kwardratow roznic wartosci parametrow i srednich arytmetycznych
+        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+            for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
+                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                    sum[i][k] += pow((data[i][j][k] - srednieArytm[i][k]),2);
+                }
+            }
+        }
+
+        // licze sume kwadratów WSZYSTKIEGO
+        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+            sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
+        }
+
+        // teraz wszystkie obliczenia przez n
+        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[i][k] = sum[i][k] / n;
+            }
+        }
+
+        // sumy kwadratow WSZYSTKIEGO przez n i pierwiastek rzędu
+        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+            sum[3][k] = sum[3][k] / (n * 3);
+        }
+
+        // wyswietlanie przybytku
+        for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++)
                 std::cout << sum[i][j] << " ";
             std::cout << std::endl;
         }
+
     }
 };
 
@@ -616,7 +654,14 @@ readfile();
 
 
     iris.min_max_rozstep();
-    std::cout << "Hello, World!" << std::endl;
+    iris.srednia(-1);
+    iris.srednia(0);
+    iris.srednia(1);
+    iris.srednia(2);
+    iris.srednia(3);
+    iris.wariancja();
+
+    std::cout << std::endl << "Hello, World!" << std::endl;
 
     return 0;
 }
