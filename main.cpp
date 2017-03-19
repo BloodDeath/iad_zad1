@@ -458,51 +458,28 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         // RZAD 0 przypadek szczegolny (srednia geometryczna)
         if (rzad == 0) {
             // licze sume logarytmow POSZCZEGOLNYCH RODZAJOW
-            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
-                    for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                    for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
                         sum[i][k] += log(data[i][j][k]);
                     }
+                    sum[3][k] += sum[i][k]; // licze sume logarytmow WSZYSTKIEGO
+                    sum[i][k] = pow(exp(sum[i][k]), 1/n); // teraz wszystkie sumy logarytmów do exp i pierwiastka POSZCZEGOLNYCH RODZAJOW
                 }
-            }
-            // licze sume logarytmow WSZYSTKIEGO
-            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
-            }
-            // teraz wszystkie sumy logarytmów do exp i pierwiastka POSZCZEGOLNYCH RODZAJOW
-            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                    sum[i][k] = pow(exp(sum[i][k]), 1/n);
-                }
-            }
-            // sumy logarytmów do exp i pierwiastka WSZYSTKIEGO
-            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                sum[3][k] = pow(exp(sum[3][k]), 1/(3*n));
+                sum[3][k] = pow(exp(sum[3][k]), 1/(3*n)); // sumy logarytmów do exp i pierwiastka WSZYSTKIEGO
             }
         } else {
             // licze sume poteg POSZCZEGOLNYCH RODZAJOW
-            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
-                    for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                    for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
                         sum[i][k] += pow(data[i][j][k], rzad);
                     }
+                    sum[3][k] += sum[i][k]; // licze sume poteg WSZYSTKIEGO
+                    sum[i][k] = pow((sum[i][k]/n), 1/rzad); // teraz wszystkie sumy poteg POSZCZEGOLNYCH RODZAJOW przez n i pierwiastek rzędu
                 }
+                sum[3][k] = pow((sum[3][k]/(n*3)), 1/rzad); // sumy poteg WSZYSTKIEGO przez n i pierwiastek rzęduv
             }
-            // licze sume poteg WSZYSTKIEGO
-            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
-            }
-            // teraz wszystkie sumy poteg POSZCZEGOLNYCH RODZAJOW przez n i pierwiastek rzędu
-            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                    sum[i][k] = pow((sum[i][k]/n), 1/rzad);
-                }
-            }
-            // sumy poteg WSZYSTKIEGO przez n i pierwiastek rzędu
-            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                sum[3][k] = pow((sum[3][k]/(n*3)), 1/rzad);
-            }
-
         }
 
         // wyswietlanie przybytku
@@ -521,29 +498,15 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         double sum[4][4] = {0}; // tabelka na wariancje poszczegolnych parametrow i rodzajow, ostatni wiersz to w wszystkiego
 
         // liczymy sume kwardratow roznic wartosci parametrow i srednich arytmetycznych
-        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-            for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
-                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
                     sum[i][k] += pow((data[i][j][k] - srednieArytm[i][k]),2);
                 }
+                sum[3][k] += sum[i][k]; // licze sume kwadratów WSZYSTKIEGO
+                sum[i][k] = sum[i][k] / n; // teraz wszystkie obliczenia przez n
             }
-        }
-
-        // licze sume kwadratów WSZYSTKIEGO
-        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-            sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
-        }
-
-        // teraz wszystkie obliczenia przez n
-        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                sum[i][k] = sum[i][k] / n;
-            }
-        }
-
-        // sumy kwadratow WSZYSTKIEGO przez n i pierwiastek rzędu
-        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-            sum[3][k] = sum[3][k] / (n * 3);
+            sum[3][k] = sum[3][k] / (n * 3); // sumy kwadratow WSZYSTKIEGO przez n i pierwiastek rzędu
         }
 
         // wyswietlanie przybytku
@@ -578,44 +541,18 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
         double sum[4][4] = {0}; // tabelka na podsumy poszczegolnych parametrow i rodzajow, ostatni wiersz to kurtoza wszystkiego
         double sum2[4][4] = {0}; // tabelka na podsumy poszczegolnych parametrow i rodzajow, ostatni wiersz to kurtoza wszystkiego
 
-        // liczymy sume 4 potęg roznic wartosci parametrow i srednich arytmetycznych
-        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-            for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
-                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                    sum[i][k] += pow((data[i][j][k] - srednieArytm[i][k]),4);
-                }
-            }
-        }
-
-        // licze sume 4 potęg WSZYSTKIEGO
+        // liczymy 1. i 2. sume 4 potęg roznic wartosci parametrow i srednich arytmetycznych
         for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-            sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
-        }
-
-        // liczymy 2. sume kwardratow roznic wartosci parametrow i srednich arytmetycznych
-        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-            for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
-                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+            for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+                for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
+                    sum[i][k] += pow((data[i][j][k] - srednieArytm[i][k]),4);
                     sum2[i][k] += pow((data[i][j][k] - srednieArytm[i][k]),2);
                 }
+                sum[3][k] += sum[i][k]; // licze sume 4 potęg WSZYSTKIEGO
+                sum2[3][k] += sum2[i][k]; // licze 2. sume kwadratów WSZYSTKIEGO
+                sum[i][k] = (sum[i][k] / n) / pow(sum2[i][k] / n, 2) - 3; // liczymy dalsze działania
             }
-        }
-
-        // licze 2. sume kwadratów WSZYSTKIEGO
-        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-            sum2[3][k] = sum2[0][k] + sum2[1][k] + sum2[2][k];
-        }
-
-        // liczymy dalsze działania
-        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
-            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-                sum[i][k] = (sum[i][k] / n) / pow(sum2[i][k] / n, 2) - 3;
-            }
-        }
-
-        // liczymy dalsze działania WSZYSTKIEGO
-        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
-            sum[3][k] = (sum[3][k] / (n * 3)) / pow(sum2[3][k] / (n * 3), 2) - 3;
+            sum[3][k] = (sum[3][k] / (n * 3)) / pow(sum2[3][k] / (n * 3), 2) - 3; // liczymy dalsze działania WSZYSTKIEGO
         }
 
         // wyswietlanie przybytku
