@@ -558,12 +558,70 @@ public: void rysuj_drugiwykres(Gnuplot wykres)
 
     void odchylenie_standardowe() {
         std::cout << std::endl << "Licze ochylenia standardowe" << std::endl; // komunikat co liczymy
+        double n = 50; // ilosc irysow w rodzaju
+        double sum[4][4] = {0}; // tabelka na sumy poszczegolnych parametrow i rodzajow, ostatni wiersz to w wszystkiego
 
+        // petelki co od razu liczą, wypisują na ekran i do zmiennej prywatnej
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 double odch = pow(wariancje[i][j], 0.5);
                 std::cout << odch << " ";
-                odchylenia[i][j] = odch; // wypisz wyniki do zmieennej priv
+                odchylenia[i][j] = odch; // wypisz wyniki do zmiennej priv
+            }
+            std::cout << std::endl;
+        }
+    }
+
+    void kurtoza() {
+        std::cout << std::endl << "Licze kurtoze" << std::endl; // komunikat co liczymy
+        double n = 50; // ilosc irysow w rodzaju
+        double sum[4][4] = {0}; // tabelka na podsumy poszczegolnych parametrow i rodzajow, ostatni wiersz to kurtoza wszystkiego
+        double sum2[4][4] = {0}; // tabelka na podsumy poszczegolnych parametrow i rodzajow, ostatni wiersz to kurtoza wszystkiego
+
+        // liczymy sume 4 potęg roznic wartosci parametrow i srednich arytmetycznych
+        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+            for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
+                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                    sum[i][k] += pow((data[i][j][k] - srednieArytm[i][k]),4);
+                }
+            }
+        }
+
+        // licze sume 4 potęg WSZYSTKIEGO
+        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+            sum[3][k] = sum[0][k] + sum[1][k] + sum[2][k];
+        }
+
+        // liczymy 2. sume kwardratow roznic wartosci parametrow i srednich arytmetycznych
+        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+            for (int j = 0; j < 50; j++) { // petelka j jedzie po wszystkich itemach
+                for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                    sum2[i][k] += pow((data[i][j][k] - srednieArytm[i][k]),2);
+                }
+            }
+        }
+
+        // licze 2. sume kwadratów WSZYSTKIEGO
+        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+            sum2[3][k] = sum2[0][k] + sum2[1][k] + sum2[2][k];
+        }
+
+        // liczymy dalsze działania
+        for (int i = 0; i < 3; i++) { // petelka i jedzie po rodzajach
+            for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+                sum[i][k] = (sum[i][k] / n) / pow(sum2[i][k] / n, 2) - 3;
+            }
+        }
+
+        // liczymy dalsze działania WSZYSTKIEGO
+        for (int k = 0; k < 4; k++) { // petelka k jedzie po kolejnych parametrach
+            sum[3][k] = (sum[3][k] / (n * 3)) / pow(sum2[3][k] / (n * 3), 2) - 3;
+        }
+
+        // wyswietlanie przybytku
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                std::cout << sum[i][j] << " ";
             }
             std::cout << std::endl;
         }
@@ -677,6 +735,7 @@ readfile();
     iris.srednia(3);
     iris.wariancja();
     iris.odchylenie_standardowe();
+    iris.kurtoza();
 
     std::cout << std::endl << "Hello, World!" << std::endl;
 
